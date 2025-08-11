@@ -45,10 +45,7 @@ async def lancer_les_des(interaction: discord.Interaction, duel_data, original_m
     suspense.set_image(url="https://images.emojiterra.com/google/noto-emoji/animated-emoji/1f3b2.gif")
     await original_message.edit(embed=suspense)
 
-    for i in range(10, 0, -1):
-        suspense.title = f"🎲 Tirage en cours..."
-        await original_message.edit(embed=suspense)
-        await asyncio.sleep(1)
+    await asyncio.sleep(5)
 
     roll1 = random.randint(1, 6)
     roll2 = random.randint(1, 6)
@@ -61,8 +58,8 @@ async def lancer_les_des(interaction: discord.Interaction, duel_data, original_m
         gagnant = None
 
     result = discord.Embed(title="🎲 Résultat du Duel", color=discord.Color.green())
-    result.add_field(name=f"{joueur1.display_name}", value=f"a lancé : **{roll1}**", inline=True)
-    result.add_field(name=f"{joueur2.display_name}", value=f"a lancé : **{roll2}**", inline=True)
+    result.add_field(name=f"🎲 {joueur1.display_name}", value=f"a lancé : **{roll1}**", inline=True)
+    result.add_field(name=f"🎲 {joueur2.display_name}", value=f"a lancé : **{roll2}**", inline=True)
     result.add_field(name=" ", value="─" * 20, inline=False)
     result.add_field(name="💰 Montant misé", value=f"**{format(montant, ',').replace(',', ' ')}** kamas par joueur", inline=False)
 
@@ -84,6 +81,7 @@ async def lancer_les_des(interaction: discord.Interaction, duel_data, original_m
 
     duels.pop(original_message.id, None)
 
+
 class DuelView(discord.ui.View):
     def __init__(self, message_id, joueur1, montant):
         super().__init__(timeout=None)
@@ -93,6 +91,7 @@ class DuelView(discord.ui.View):
         self.joueur2 = None
         self.croupier = None
 
+        # On crée le premier bouton pour rejoindre
         self.rejoindre_joueur_button = discord.ui.Button(label="🎲 Rejoindre le duel", style=discord.ButtonStyle.green, custom_id="rejoindre_joueur")
         self.rejoindre_joueur_button.callback = self.rejoindre_joueur
         self.add_item(self.rejoindre_joueur_button)
@@ -118,9 +117,10 @@ class DuelView(discord.ui.View):
         if duel_data:
             duel_data["joueur2"] = self.joueur2
 
+        # Désactive le bouton de rejoindre pour le joueur2 et ajoute le bouton pour le croupier
         self.rejoindre_joueur_button.disabled = True
         self.clear_items()
-
+        
         self.rejoindre_croupier_button = discord.ui.Button(label="🤝 Rejoindre en tant que Croupier", style=discord.ButtonStyle.secondary, custom_id="rejoindre_croupier")
         self.rejoindre_croupier_button.callback = self.rejoindre_croupier
         self.add_item(self.rejoindre_croupier_button)
@@ -131,8 +131,10 @@ class DuelView(discord.ui.View):
         embed.set_footer(text="Un croupier est nécessaire pour lancer les dés.")
 
         role_croupier = discord.utils.get(interaction.guild.roles, name="croupier")
-        content_ping = f"{role_croupier.mention} — Un duel de dés est prêt ! Un croupier est attendu."
-
+        content_ping = ""
+        if role_croupier:
+            content_ping = f"{role_croupier.mention} — Un nouveau duel est prêt ! Un croupier est attendu."
+        
         await self.update_view(interaction, embed, content=content_ping)
 
     async def rejoindre_croupier(self, interaction: discord.Interaction):
@@ -144,7 +146,7 @@ class DuelView(discord.ui.View):
             return
 
         if self.croupier:
-            await interaction.response.send_message(f"❌ Un croupier a déjà rejoint le duel.", ephemeral=True)
+            await interaction.response.send_message(f"❌ Un croupier ({self.croupier.mention}) a déjà rejoint le duel.", ephemeral=True)
             return
 
         self.croupier = interaction.user
@@ -152,8 +154,9 @@ class DuelView(discord.ui.View):
         if duel_data:
             duel_data["croupier"] = self.croupier
         
+        # Désactive le bouton du croupier et ajoute le bouton pour lancer le duel
         self.clear_items()
-
+        
         self.lancer_des_button = discord.ui.Button(label="🎰 Lancer les dés !", style=discord.ButtonStyle.success, custom_id="lancer_des")
         self.lancer_des_button.callback = self.lancer_des
         self.add_item(self.lancer_des_button)
@@ -276,7 +279,6 @@ async def quit_duel(interaction: discord.Interaction):
             await interaction.response.send_message("❌ Une erreur s'est produite lors de la mise à jour du duel.", ephemeral=True)
 
 # --- STATS VIEWS AND COMMANDS ---
-# (Le code des classes StatsView, StatsAll et Mystats est le même que dans votre code original)
 class StatsView(discord.ui.View):
     def __init__(self, ctx, entries, page=0):
         super().__init__(timeout=120)
