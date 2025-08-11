@@ -98,7 +98,7 @@ class DuelView(discord.ui.View):
 
     async def update_view(self, interaction: discord.Interaction, embed: discord.Embed, content: str = None):
         """Met à jour l'embed et les boutons de la vue."""
-        await interaction.response.edit_message(content=content, embed=embed, view=self, allowed_mentions=discord.AllowedMentions(roles=True))
+        await interaction.response.edit_message(content=content, embed=embed, view=self, allowed_mentions=discord.AllowedMentions(roles=True, users=True))
 
     async def rejoindre_joueur(self, interaction: discord.Interaction):
         """Gère l'action du joueur2 rejoignant le duel."""
@@ -213,13 +213,18 @@ async def duel(interaction: discord.Interaction, montant: int):
     )
 
     view = DuelView(None, interaction.user, montant)
+    
+    role_membre = discord.utils.get(interaction.guild.roles, name="membre")
+    ping_content = ""
+    if role_membre:
+        ping_content = f"{role_membre.mention} — Un nouveau duel est prêt ! Un joueur est attendu."
 
     await interaction.response.send_message(
-        content="Un nouveau duel est prêt !",
+        content=ping_content,
         embed=embed,
         view=view,
         ephemeral=False,
-        allowed_mentions=discord.AllowedMentions.none()
+        allowed_mentions=discord.AllowedMentions(roles=True)
     )
 
     sent_message = await interaction.original_response()
@@ -276,7 +281,12 @@ async def quit_duel(interaction: discord.Interaction):
 
             new_view = DuelView(message_initial.id, joueur1, montant)
 
-            await message_initial.edit(content="Un nouveau duel est prêt !", embed=new_embed, view=new_view, allowed_mentions=discord.AllowedMentions.none())
+            role_membre = discord.utils.get(interaction.guild.roles, name="membre")
+            ping_content = ""
+            if role_membre:
+                ping_content = f"{role_membre.mention} — Un nouveau duel est prêt ! Un joueur est attendu."
+
+            await message_initial.edit(content=ping_content, embed=new_embed, view=new_view, allowed_mentions=discord.AllowedMentions(roles=True))
             duels[message_initial.id] = {"joueur1": joueur1, "montant": montant, "joueur2": None, "croupier": None}
             await interaction.response.send_message("✅ Tu as quitté le duel. Le créateur attend maintenant un autre joueur.", ephemeral=True)
         except Exception as e:
