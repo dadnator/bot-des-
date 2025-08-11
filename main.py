@@ -189,6 +189,10 @@ class DuelView(discord.ui.View):
 @bot.tree.command(name="duel", description="Lancer un duel de dés avec un montant.")
 @app_commands.describe(montant="Montant misé en kamas")
 async def duel(interaction: discord.Interaction, montant: int):
+    if not isinstance(interaction.channel, discord.TextChannel) or interaction.channel.name != "duel-dés":
+        await interaction.response.send_message("❌ Cette commande ne peut être utilisée que dans le salon #duel-dés.", ephemeral=True)
+        return
+
     if montant <= 0:
         await interaction.response.send_message("❌ Le montant doit être supérieur à 0.", ephemeral=True)
         return
@@ -349,6 +353,10 @@ class StatsView(discord.ui.View):
 
 @bot.tree.command(name="statsall", description="Affiche les stats du duel de dés ")
 async def statsall(interaction: discord.Interaction):
+    if not isinstance(interaction.channel, discord.TextChannel) or interaction.channel.name != "duel-dés":
+        await interaction.response.send_message("❌ Cette commande ne peut être utilisée que dans le salon #duel-dés.", ephemeral=True)
+        return
+
     c.execute("""
     SELECT joueur_id,
             SUM(montant) as total_mise,
