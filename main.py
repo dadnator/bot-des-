@@ -52,8 +52,8 @@ async def lancer_les_des(interaction: discord.Interaction, duel_data, original_m
     countdown_message = await interaction.channel.send(embed=suspense_embed)
 
     # 3. Compte à rebours en modifiant le nouveau message
-    for i in range(5, 0, -1):
-        suspense_embed.title = f"🎲 Tirage dans {i}..."
+    for i in range(10, 0, -1):
+        suspense_embed.title = f"🎲 Tirage dans ..."
         await countdown_message.edit(embed=suspense_embed)
         await asyncio.sleep(1)
 
@@ -142,7 +142,7 @@ class DuelView(discord.ui.View):
 
         embed = interaction.message.embeds[0]
         embed.title = f"🎲 Duel de Dés prêt à démarrer !"
-        embed.description = f"{self.joueur1.mention} et {self.joueur2.mention} sont prêts pour un duel de **{self.montant:,.0f}** kamas."
+        Embed.description = f"{self.joueur1.mention} et {self.joueur2.mention} sont prêts pour un duel de **{format(self.montant, ',').replace(',', ' ')}** kamas."
         
         # --- Modifications ici ---
         embed.add_field(name="Status", value="🕓 Un croupier est attendu pour lancer le duel.", inline=False)
