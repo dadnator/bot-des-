@@ -50,7 +50,7 @@ async def lancer_les_des(interaction: discord.Interaction, duel_data, original_m
     await original_message.edit(embed=suspense_embed)
 
     # Compte à rebours
-    for i in range(5, 0, -1):
+    for i in range(10, 0, -1):
         suspense_embed.title = f"🎲 Tirage dans {i}..."
         await original_message.edit(embed=suspense_embed)
         await asyncio.sleep(1)
