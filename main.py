@@ -143,7 +143,11 @@ class DuelView(discord.ui.View):
         embed = interaction.message.embeds[0]
         embed.title = f"🎲 Duel de Dés prêt à démarrer !"
         embed.description = f"{self.joueur1.mention} et {self.joueur2.mention} sont prêts pour un duel de **{self.montant:,.0f}** kamas."
-        embed.set_footer(text="Un croupier est nécessaire pour lancer les dés.")
+        
+        # --- Modifications ici ---
+        embed.add_field(name="Status", value="🕓 Un croupier est attendu pour lancer le duel.", inline=False)
+        embed.set_footer(text="Cliquez sur le bouton pour rejoindre en tant que croupier.")
+        # --- Fin des modifications ---
 
         role_croupier = discord.utils.get(interaction.guild.roles, name="croupier")
         content_ping = ""
@@ -178,8 +182,10 @@ class DuelView(discord.ui.View):
 
         embed = interaction.message.embeds[0]
         embed.title = f"🎲 Duel de Dés prêt !"
-        embed.description = f"Le croupier {self.croupier.mention} est en place. Le duel peut commencer."
-        embed.set_footer(text="Le croupier peut lancer les dés.")
+        # --- Modifications ici ---
+        embed.set_field_at(0, name="Status", value=f"✅ Prêt à jouer ! Croupier : {self.croupier.mention}", inline=False)
+        embed.set_footer(text="Cliquez sur le bouton pour lancer les dés.")
+        # --- Fin des modifications ---
 
         await self.update_view(interaction, embed, content=None)
 
