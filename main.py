@@ -39,17 +39,29 @@ async def lancer_les_des(interaction: discord.Interaction, duel_data, original_m
     joueur1 = duel_data["joueur1"]
     joueur2 = duel_data["joueur2"]
     montant = duel_data["montant"]
-    croupier = duel_data["croupier"]
 
-    suspense = discord.Embed(title="🎲 Lancer des dés en cours...", description="Les dés sont jetés... 🎲", color=discord.Color.greyple())
-    suspense.set_image(url="https://images.emojiterra.com/google/noto-emoji/animated-emoji/1f3b2.gif")
-    await original_message.edit(embed=suspense)
+    suspense_embed = discord.Embed(
+        title="🎲 Tirage en cours...",
+        description="Lancement des dés imminent... 🎲",
+        color=discord.Color.greyple()
+    )
+    
+    suspense_embed.set_image(url="https://images.emojiterra.com/google/noto-emoji/animated-emoji/1f3b2.gif")
+    await original_message.edit(embed=suspense_embed)
 
-    await asyncio.sleep(5)
+    # Compte à rebours
+    for i in range(5, 0, -1):
+        suspense_embed.title = f"🎲 Tirage dans {i}..."
+        await original_message.edit(embed=suspense_embed)
+        await asyncio.sleep(1)
+    
+    # Le bot ne dit plus "Les dés sont jetés !", il passe directement au résultat.
+    # On ajoute juste un petit délai pour la fluidité.
+    await asyncio.sleep(1) 
 
     roll1 = random.randint(1, 6)
     roll2 = random.randint(1, 6)
-
+    
     if roll1 > roll2:
         gagnant = joueur1
     elif roll2 > roll1:
