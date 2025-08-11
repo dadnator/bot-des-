@@ -40,25 +40,24 @@ async def lancer_les_des(interaction: discord.Interaction, duel_data, original_m
     joueur2 = duel_data["joueur2"]
     montant = duel_data["montant"]
 
+    # 1. Créer un nouvel embed pour le suspense
     suspense_embed = discord.Embed(
         title="🎲 Tirage en cours...",
         description="Lancement des dés imminent... 🎲",
         color=discord.Color.greyple()
     )
-    
     suspense_embed.set_image(url="https://images.emojiterra.com/google/noto-emoji/animated-emoji/1f3b2.gif")
-    await original_message.edit(embed=suspense_embed)
-
-    # Compte à rebours
-    for i in range(10, 0, -1):
-        suspense_embed.title = f"🎲 Tirage dans {i}..."
-        await original_message.edit(embed=suspense_embed)
-        await asyncio.sleep(1)
     
-    # Le bot ne dit plus "Les dés sont jetés !", il passe directement au résultat.
-    # On ajoute juste un petit délai pour la fluidité.
-    await asyncio.sleep(1) 
+    # 2. Envoyer un nouveau message avec l'embed de suspense
+    countdown_message = await interaction.channel.send(embed=suspense_embed)
 
+    # 3. Compte à rebours en modifiant le nouveau message
+    for i in range(5, 0, -1):
+        suspense_embed.title = f"🎲 Tirage dans {i}..."
+        await countdown_message.edit(embed=suspense_embed)
+        await asyncio.sleep(1)
+
+    # 4. Préparer l'embed du résultat
     roll1 = random.randint(1, 6)
     roll2 = random.randint(1, 6)
     
@@ -80,8 +79,13 @@ async def lancer_les_des(interaction: discord.Interaction, duel_data, original_m
     else:
         result.add_field(name="⚖️ Égalité", value="Aucun gagnant, vous récupérez vos mises", inline=False)
 
-    await original_message.edit(embed=result, view=None)
+    # 5. Modifier le message de suspense pour y mettre le résultat
+    await countdown_message.edit(embed=result, view=None)
 
+    # 6. Supprimer l'ancien message (celui avec les boutons)
+    # L'ancienne ligne a été déplacée ici :
+    await original_message.delete()
+    
     now = datetime.utcnow()
     try:
         if gagnant:
@@ -92,7 +96,6 @@ async def lancer_les_des(interaction: discord.Interaction, duel_data, original_m
         print("Erreur base de données:", e)
 
     duels.pop(original_message.id, None)
-
 
 class DuelView(discord.ui.View):
     def __init__(self, message_id, joueur1, montant):
