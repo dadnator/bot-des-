@@ -167,7 +167,7 @@ class DuelView(discord.ui.View):
 
         embed = interaction.message.embeds[0]
         embed.title = f"🎲 Duel de Dés prêt à démarrer !"
-        Embed.description = f"{self.joueur1.mention} et {self.joueur2.mention} sont prêts pour un duel de **{format(self.montant, ',').replace(',', ' ')}** kamas."
+        embed.description = f"{self.joueur1.mention} et {self.joueur2.mention} sont prêts pour un duel de **{format(self.montant, ',').replace(',', ' ')}** kamas."
         
         # --- Modifications ici ---
         embed.add_field(name="Status", value="🕓 Un croupier est attendu pour lancer le duel.", inline=False)
