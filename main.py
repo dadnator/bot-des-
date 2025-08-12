@@ -35,6 +35,8 @@ async def on_app_command_error(interaction: discord.Interaction, error):
     if isinstance(error, app_commands.CheckFailure):
         await interaction.response.send_message("❌ Tu n'as pas la permission d'utiliser cette commande.", ephemeral=True)
 
+# ... (le reste de votre code)
+
 async def lancer_les_des(interaction: discord.Interaction, duel_data, original_message):
     joueur1 = duel_data["joueur1"]
     joueur2 = duel_data["joueur2"]
@@ -53,37 +55,55 @@ async def lancer_les_des(interaction: discord.Interaction, duel_data, original_m
 
     # 3. Compte à rebours en modifiant le nouveau message
     for i in range(10, 0, -1):
-        suspense_embed.title = f"🎲 Tirage dans ..."
+        suspense_embed.title = f"🎲 Tirage dans {i}..."
         await countdown_message.edit(embed=suspense_embed)
         await asyncio.sleep(1)
 
-    # 4. Préparer l'embed du résultat
-    roll1 = random.randint(1, 6)
-    roll2 = random.randint(1, 6)
+    # --- DEBUT DES MODIFICATIONS ---
     
+    # Initialiser le compteur de relances
+    re_rolls = 0
+    while True:
+        roll1 = random.randint(1, 6)
+        roll2 = random.randint(1, 6)
+
+        # Si les dés sont égaux, on relance
+        if roll1 == roll2:
+            re_rolls += 1
+            suspense_embed.title = "⚖️ Égalité ! Relance en cours..."
+            await countdown_message.edit(embed=suspense_embed)
+            await asyncio.sleep(1)
+        else:
+            # On sort de la boucle si les dés sont différents
+            break
+
+    # Déterminer le gagnant
     if roll1 > roll2:
         gagnant = joueur1
-    elif roll2 > roll1:
-        gagnant = joueur2
     else:
-        gagnant = None
+        gagnant = joueur2
 
+    # --- FIN DES MODIFICATIONS ---
+
+    # 4. Préparer l'embed du résultat
     result = discord.Embed(title="🎲 Résultat du Duel", color=discord.Color.green())
     result.add_field(name=f"🎲 {joueur1.display_name}", value=f"a lancé : **{roll1}**", inline=True)
     result.add_field(name=f"🎲 {joueur2.display_name}", value=f"a lancé : **{roll2}**", inline=True)
     result.add_field(name=" ", value="─" * 20, inline=False)
     result.add_field(name="💰 Montant misé", value=f"**{format(montant, ',').replace(',', ' ')}** kamas par joueur", inline=False)
+    
+    # --- AJOUT DE L'AFFICHAGE DES RELANCES ---
+    if re_rolls > 0:
+        result.add_field(name="🔄 Relances", value=f"Il a fallu **{re_rolls}** relance(s) pour obtenir un résultat.", inline=False)
+    # --- FIN DE L'AJOUT ---
 
-    if gagnant:
-        result.add_field(name="🏆 Gagnant", value=f"{gagnant.mention} remporte **{format(2 * montant, ',').replace(',', ' ')}** kamas !", inline=False)
-    else:
-        result.add_field(name="⚖️ Égalité", value="Aucun gagnant, vous récupérez vos mises", inline=False)
+    # Afficher le gagnant
+    result.add_field(name="🏆 Gagnant", value=f"{gagnant.mention} remporte **{format(2 * montant, ',').replace(',', ' ')}** kamas !", inline=False)
 
     # 5. Modifier le message de suspense pour y mettre le résultat
     await countdown_message.edit(embed=result, view=None)
 
     # 6. Supprimer l'ancien message (celui avec les boutons)
-    # L'ancienne ligne a été déplacée ici :
     await original_message.delete()
     
     now = datetime.utcnow()
@@ -97,6 +117,7 @@ async def lancer_les_des(interaction: discord.Interaction, duel_data, original_m
 
     duels.pop(original_message.id, None)
 
+# ... (le reste de votre code)
 class DuelView(discord.ui.View):
     def __init__(self, message_id, joueur1, montant):
         super().__init__(timeout=None)
