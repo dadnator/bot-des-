@@ -83,6 +83,10 @@ async def lancer_les_des(interaction: discord.Interaction, duel_data, original_m
     else:
         gagnant = joueur2
 
+    if gagnant:
+        total_mise = 2 * montant
+        commission_montant = int(total_mise * 0.05)  # 5% de commission
+        montant_gagne = total_mise - commission_montant
     # --- FIN DES MODIFICATIONS ---
 
     # 4. Préparer l'embed du résultat
@@ -98,7 +102,7 @@ async def lancer_les_des(interaction: discord.Interaction, duel_data, original_m
     # --- FIN DE L'AJOUT ---
 
     # Afficher le gagnant
-    result.add_field(name="🏆 Gagnant", value=f"{gagnant.mention} remporte **{format(2 * montant, ',').replace(',', ' ')}** kamas !", inline=False)
+    result.add_field(name="🏆 Gagnant", value=f"{gagnant.mention} remporte **{format(montant_gagne, ',').replace(',', ' ')}** kamas  💰 (après 5% de commission) ", inline=False)
 
     # 5. Modifier le message de suspense pour y mettre le résultat
     await countdown_message.edit(embed=result, view=None)
@@ -412,7 +416,7 @@ async def statsall(interaction: discord.Interaction):
     c.execute("""
     SELECT joueur_id,
             SUM(montant) as total_mise,
-            SUM(CASE WHEN gagnant_id = joueur_id THEN montant * 2 ELSE 0 END) as kamas_gagnes,
+            SUM(CASE WHEN gagnant_id = joueur_id THEN montant * 2 * 0.95 ELSE 0 END) as kamas_gagnes,
             SUM(CASE WHEN gagnant_id = joueur_id THEN 1 ELSE 0 END) as victoires,
             COUNT(*) as total_paris
     FROM (
@@ -445,7 +449,7 @@ async def mystats(interaction: discord.Interaction):
     c.execute("""
     SELECT joueur_id,
             SUM(montant) as total_mise,
-            SUM(CASE WHEN gagnant_id = joueur_id THEN montant * 2 ELSE 0 END) as kamas_gagnes,
+            SUM(CASE WHEN gagnant_id = joueur_id THEN montant * 2 * 0.95 ELSE 0 END) as kamas_gagnes,
             SUM(CASE WHEN gagnant_id = joueur_id THEN 1 ELSE 0 END) as victoires,
             COUNT(*) as total_paris
     FROM (
