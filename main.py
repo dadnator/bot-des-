@@ -55,7 +55,7 @@ async def lancer_les_des(interaction: discord.Interaction, duel_data, original_m
 
     # 3. Compte à rebours en modifiant le nouveau message
     for i in range(10, 0, -1):
-        suspense_embed.title = f"🎲 Tirage dans {i}..."
+        suspense_embed.title = f"🎲 Tirage dans ..."
         await countdown_message.edit(embed=suspense_embed)
         await asyncio.sleep(1)
 
