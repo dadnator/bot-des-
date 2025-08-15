@@ -45,7 +45,7 @@ async def lancer_les_des(interaction: discord.Interaction, duel_data, original_m
     # 1. Créer un nouvel embed pour le suspense
     suspense_embed = discord.Embed(
         title="🎲 Tirage en cours...",
-        description="Lancement des dés imminent... 🎲",
+        description="On croise les doigts 🤞🏻 !",
         color=discord.Color.greyple()
     )
     suspense_embed.set_image(url="https://images.emojiterra.com/google/noto-emoji/animated-emoji/1f3b2.gif")
@@ -90,11 +90,11 @@ async def lancer_les_des(interaction: discord.Interaction, duel_data, original_m
     # --- FIN DES MODIFICATIONS ---
 
     # 4. Préparer l'embed du résultat
-    result = discord.Embed(title="🎲 Résultat du Duel", color=discord.Color.green())
-    result.add_field(name=f"🎲 {joueur1.display_name}", value=f"a lancé : **{roll1}**", inline=True)
-    result.add_field(name=f"🎲 {joueur2.display_name}", value=f"a lancé : **{roll2}**", inline=True)
+    result = discord.Embed(title="🎲 Résultat du Duel de Dés", color=discord.Color.green())
+    result.add_field(name=f"🎲 {joueur1.display_name}", value=f"à obtenu : **{roll1}**", inline=True)
+    result.add_field(name=f"🎲 {joueur2.display_name}", value=f"à obtenu : **{roll2}**", inline=True)
     result.add_field(name=" ", value="─" * 20, inline=False)
-    result.add_field(name="💰 Montant misé", value=f"**{format(montant, ',').replace(',', ' ')}** kamas par joueur", inline=False)
+    
     
     # --- AJOUT DE L'AFFICHAGE DES RELANCES ---
     if re_rolls > 0:
@@ -103,6 +103,7 @@ async def lancer_les_des(interaction: discord.Interaction, duel_data, original_m
 
     # Afficher le gagnant
     result.add_field(name="🏆 Gagnant", value=f"{gagnant.mention} remporte **{format(montant_gagne, ',').replace(',', ' ')}** kamas  💰 (après 5% de commission) ", inline=False)
+    result.add_field(name="💰 Montant misé", value=f"{format(montant, ',').replace(',', ' ')} kamas par joueur", inline=False)
 
     # 5. Modifier le message de suspense pour y mettre le résultat
     await countdown_message.edit(embed=result, view=None)
