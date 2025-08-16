@@ -10,6 +10,11 @@ from datetime import datetime
 
 # --- TOKEN ET INTENTS ---
 token = os.environ['TOKEN_BOT_DISCORD']
+
+ID_CROUPIER = 1406210029815861258
+ID_MEMBRE = 1406210131515019355
+ID_SALON_DUEL = 1404445873236213820
+
 intents = discord.Intents.default()
 bot = commands.Bot(command_prefix="/", intents=intents)
 
@@ -175,7 +180,7 @@ class DuelView(discord.ui.View):
         embed.set_footer(text="Cliquez sur le bouton pour rejoindre en tant que croupier.")
         # --- Fin des modifications ---
 
-        role_croupier = discord.utils.get(interaction.guild.roles, name="croupier")
+        role_croupier = interaction.guild.get_role(ID_CROUPIER)
         content_ping = ""
         if role_croupier:
             content_ping = f"{role_croupier.mention} — Un nouveau duel est prêt ! Un croupier est attendu."
@@ -184,7 +189,7 @@ class DuelView(discord.ui.View):
 
     async def rejoindre_croupier(self, interaction: discord.Interaction):
         """Gère l'action du croupier rejoignant le duel."""
-        role_croupier = discord.utils.get(interaction.guild.roles, name="croupier")
+        role_croupier = interaction.guild.get_role(ID_CROUPIER)
 
         if not role_croupier or role_croupier not in interaction.user.roles:
             await interaction.response.send_message("❌ Tu n'as pas le rôle de `croupier` pour rejoindre ce duel.", ephemeral=True)
@@ -236,8 +241,8 @@ class DuelView(discord.ui.View):
 @bot.tree.command(name="duel", description="Lancer un duel de dés avec un montant.")
 @app_commands.describe(montant="Montant misé en kamas")
 async def duel(interaction: discord.Interaction, montant: int):
-    if not isinstance(interaction.channel, discord.TextChannel) or interaction.channel.name != "duel-dés":
-        await interaction.response.send_message("❌ Cette commande ne peut être utilisée que dans le salon #duel-dés.", ephemeral=True)
+    if interaction.channel.id != ID_SALON_DUEL:
+        await interaction.response.send_message("❌ Cette commande ne peut être utilisée que dans le salon #『🎲』dés.", ephemeral=True)
         return
 
     if montant <= 0:
@@ -261,7 +266,7 @@ async def duel(interaction: discord.Interaction, montant: int):
 
     view = DuelView(None, interaction.user, montant)
     
-    role_membre = discord.utils.get(interaction.guild.roles, name="membre")
+    role_membre = interaction.guild.get_role(ID_MEMBRE)
     ping_content = ""
     if role_membre:
         ping_content = f"{role_membre.mention} — Un nouveau duel est prêt ! Un joueur est attendu."
@@ -328,7 +333,7 @@ async def quit_duel(interaction: discord.Interaction):
 
             new_view = DuelView(message_initial.id, joueur1, montant)
 
-            role_membre = discord.utils.get(interaction.guild.roles, name="membre")
+            role_membre = interaction.guild.get_role(ID_MEMBRE)
             ping_content = ""
             if role_membre:
                 ping_content = f"{role_membre.mention} — Un nouveau duel est prêt ! Un joueur est attendu."
@@ -410,8 +415,8 @@ class StatsView(discord.ui.View):
 
 @bot.tree.command(name="statsall", description="Affiche les stats du duel de dés ")
 async def statsall(interaction: discord.Interaction):
-    if not isinstance(interaction.channel, discord.TextChannel) or interaction.channel.name != "duel-dés":
-        await interaction.response.send_message("❌ Cette commande ne peut être utilisée que dans le salon #duel-dés.", ephemeral=True)
+    if interaction.channel.id != ID_SALON_DUEL:
+        await interaction.response.send_message("❌ Cette commande ne peut être utilisée que dans le salon #『🎲』dés.", ephemeral=True)
         return
 
     c.execute("""
